@@ -15,7 +15,6 @@ open class Page(
     @Transient var uri: Uri? = null, // Deprecated but can't be deleted due to extensions
 ) : ProgressListener {
 
-    /** Set by text-based (novel) sources; rendered in a WebView instead of an image. */
     @Transient
     var html: String? = null
 
