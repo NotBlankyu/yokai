@@ -15,6 +15,9 @@ open class Page(
     @Transient var uri: Uri? = null, // Deprecated but can't be deleted due to extensions
 ) : ProgressListener {
 
+    @Transient
+    var html: String? = null
+
     val number: Int
         get() = index + 1
 
