@@ -1202,4 +1202,8 @@
     <string name="crash_screen_restart_application">Restart the application</string>
 
     <string name="refresh">Refresh</string>
+
+    <string name="text_size">Text size</string>
+    <string name="line_spacing">Line spacing</string>
+    <string name="text_color">Text color</string>
 </resources>

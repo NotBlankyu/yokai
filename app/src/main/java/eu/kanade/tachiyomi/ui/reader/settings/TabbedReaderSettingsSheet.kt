@@ -40,11 +40,15 @@ class TabbedReaderSettingsSheet(
         R.layout.reader_color_filter,
         null,
     ) as ReaderFilterView
+    private val textView = ReaderTextView(readerActivity)
 
     var showWebtoonView: Boolean = run {
         val mangaViewer = readerActivity.viewModel.getMangaReadingMode()
         ReadingModeType.isWebtoonType(mangaViewer)
     }
+
+    private val showTextView: Boolean =
+        ReadingModeType.isTextType(readerActivity.viewModel.getMangaReadingMode())
 
     override var offset = 0
 
@@ -60,13 +64,17 @@ class TabbedReaderSettingsSheet(
 
     override fun getTabViews(): List<View> = listOf(
         generalView,
-        pagedView,
+        if (showTextView) textView else pagedView,
         filterView,
     )
 
     override fun getTabTitles(): List<StringResource> = listOf(
         MR.strings.general,
-        if (showWebtoonView) MR.strings.long_strip else MR.strings.paged,
+        when {
+            showTextView -> MR.strings.text_viewer
+            showWebtoonView -> MR.strings.long_strip
+            else -> MR.strings.paged
+        },
         MR.strings.custom_filter,
     )
 

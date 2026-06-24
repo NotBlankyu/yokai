@@ -105,6 +105,12 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun readerTheme() = preferenceStore.getInt(Keys.readerTheme, 2)
 
+    fun readerTextSize() = preferenceStore.getInt("reader_text_size", 18)
+
+    fun readerLineSpacing() = preferenceStore.getInt("reader_line_spacing", 14)
+
+    fun readerTextColor() = preferenceStore.getInt("reader_text_color", 0)
+
     fun cropBorders() = preferenceStore.getBoolean(Keys.cropBorders, false)
 
     fun cropBordersWebtoon() = preferenceStore.getBoolean(Keys.cropBordersWebtoon, false)

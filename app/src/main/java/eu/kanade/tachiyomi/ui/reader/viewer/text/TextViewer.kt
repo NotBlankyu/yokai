@@ -51,6 +51,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -85,6 +86,9 @@ class TextViewer(val activity: ReaderActivity) : BaseViewer {
 
     private var items by mutableStateOf<List<TextUi>>(emptyList())
     private val theme = mutableIntStateOf(preferences.readerTheme().get())
+    private val textSize = mutableIntStateOf(preferences.readerTextSize().get())
+    private val lineSpacing = mutableIntStateOf(preferences.readerLineSpacing().get())
+    private val textColor = mutableIntStateOf(preferences.readerTextColor().get())
     private var listState: LazyListState? = null
 
     private var currentChapter: ReaderChapter? = null
@@ -125,6 +129,9 @@ class TextViewer(val activity: ReaderActivity) : BaseViewer {
                 TextReader(
                     items = items,
                     theme = theme.intValue,
+                    textSize = textSize.intValue,
+                    lineSpacing = lineSpacing.intValue,
+                    textColor = textColor.intValue,
                     listState = state,
                     manga = activity.viewModel.manga,
                     downloadManager = downloadManager,
@@ -136,6 +143,9 @@ class TextViewer(val activity: ReaderActivity) : BaseViewer {
 
     init {
         preferences.readerTheme().changesIn(scope) { theme.intValue = it }
+        preferences.readerTextSize().changesIn(scope) { textSize.intValue = it }
+        preferences.readerLineSpacing().changesIn(scope) { lineSpacing.intValue = it }
+        preferences.readerTextColor().changesIn(scope) { textColor.intValue = it }
     }
 
     override fun getView(): View = composeView
@@ -251,13 +261,18 @@ private fun TextUi.key(): String = when (this) {
 private fun TextReader(
     items: List<TextUi>,
     theme: Int,
+    textSize: Int,
+    lineSpacing: Int,
+    textColor: Int,
     listState: LazyListState,
     manga: Manga?,
     downloadManager: DownloadManager,
     onTap: () -> Unit,
 ) {
     val background = Color(ThemeUtil.readerBackgroundColor(theme, MaterialTheme.colorScheme.background.toArgb()))
-    val contentColor = ThemeUtil.readerContentColor(theme, MaterialTheme.colorScheme.onBackground)
+    val contentColor = if (textColor != 0) Color(textColor) else ThemeUtil.readerContentColor(theme, MaterialTheme.colorScheme.onBackground)
+    val fontSize = textSize.sp
+    val lineHeight = (textSize * lineSpacing / 10f).sp
     val toolbar = remember { TextSelectionToolbar() }
 
     Box(modifier = Modifier.fillMaxSize().background(background)) {
@@ -281,11 +296,11 @@ private fun TextReader(
                             is TextUi.Title -> Text(
                                 text = item.page.chapter.chapter.name,
                                 color = contentColor,
-                                fontSize = 22.sp,
+                                fontSize = (textSize + 4).sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                             )
-                            is TextUi.Block -> BlockContent(item.block, contentColor)
+                            is TextUi.Block -> BlockContent(item.block, contentColor, fontSize, lineHeight)
                             is TextUi.Transition -> TransitionContent(item.transition, theme, manga, downloadManager)
                         }
                     }
@@ -339,19 +354,19 @@ private fun BoxScope.SelectionCopyBar(toolbar: TextSelectionToolbar) {
 }
 
 @Composable
-private fun BlockContent(block: TextBlock, color: Color) {
+private fun BlockContent(block: TextBlock, color: Color, fontSize: TextUnit, lineHeight: TextUnit) {
     when (block) {
         is TextBlock.Paragraph -> Text(
             text = remember(block.html) { AnnotatedString.fromHtml(block.html) },
             color = color,
-            fontSize = 18.sp,
-            lineHeight = 27.sp,
+            fontSize = fontSize,
+            lineHeight = lineHeight,
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         )
         is TextBlock.Heading -> Text(
             text = remember(block.html) { AnnotatedString.fromHtml(block.html) },
             color = color,
-            fontSize = 20.sp,
+            fontSize = (fontSize.value * 1.15f).sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
         )
